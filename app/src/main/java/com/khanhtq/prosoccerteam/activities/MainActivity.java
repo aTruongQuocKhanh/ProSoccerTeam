@@ -9,9 +9,13 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -21,42 +25,63 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.khanhtq.prosoccerteam.R;
+import com.khanhtq.prosoccerteam.adapters.TeamInfoWindowAdapter;
+import com.khanhtq.prosoccerteam.util.Constants;
+import com.khanhtq.prosoccerteam.util.SearchLocationManager;
 
 /**
  * Created by khanhtq on 2/16/16.
  */
-public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLocationButtonClickListener, OnMapReadyCallback, LocationListener {
+public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLocationButtonClickListener,
+        OnMapReadyCallback,
+        GoogleMap.OnCameraChangeListener,
+        LocationListener {
     public static final String TAG = MainActivity.class.getSimpleName();
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
     private View mSplashView;
     private AdView mAdView;
     private Toolbar mToolbar;
+    private DrawerLayout mDrawerlayout;
 
     private Handler mHandler;
     private GoogleMap mMap;
     private LocationManager mLocationManager;
     private AdRequest mAdRequest;
+    private SearchLocationManager mSearchManager;
+    private boolean isFirstOpen = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mDrawerlayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         // show header view
         mToolbar = (Toolbar) findViewById(R.id.toolbar_layout);
         mToolbar.setTitle("");
         setSupportActionBar(mToolbar);
+        final ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+
+        mSplashView = findViewById(R.id.splash_layout);
+        mHandler = new Handler();
+        hideSplash();
+
+        mSearchManager = SearchLocationManager.getInstance();
 
         // load map
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        mSplashView = findViewById(R.id.splash_layout);
         mAdView = (AdView) findViewById(R.id.adView);
         mAdRequest = new AdRequest.Builder().build();
-        mHandler = new Handler();
-        hideSplash();
     }
 
     private void hideSplash() {
@@ -64,17 +89,30 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
             @Override
             public void run() {
                 if (mSplashView.getVisibility() != View.GONE) {
-                    mSplashView.animate().setDuration(5000).alpha(0).start();
+                    mSplashView.animate().setDuration(500).alpha(0).start();
                     mSplashView.setVisibility(View.GONE);
                     mAdView.loadAd(mAdRequest);
                 }
             }
-        }, 5000);
+        }, 500);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                mDrawerlayout.openDrawer(GravityCompat.START);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setInfoWindowAdapter(new TeamInfoWindowAdapter(this));
+        mMap.setOnCameraChangeListener(this);
         enableMyLocation();
     }
 
@@ -95,6 +133,7 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
             Location location = mLocationManager.getLastKnownLocation(provider);
             if (location != null) {
                 onLocationChanged(location);
+                isFirstOpen = false;
             }
             mLocationManager.requestLocationUpdates(provider, 10000, 0, this);
         }
@@ -117,8 +156,11 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         double longitude = location.getLongitude();
         LatLng newPos = new LatLng(latitude, longitude);
         if (mMap != null) {
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(newPos));
-            mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+            mSearchManager.startSearchTeam(mMap, newPos);
+            if (isFirstOpen) {
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(newPos));
+                mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+            }
         }
     }
 
@@ -141,5 +183,13 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
     public boolean onMyLocationButtonClick() {
         Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
         return false;
+    }
+
+    @Override
+    public void onCameraChange(CameraPosition cameraPosition) {
+        Log.d(TAG, "onCameraChange --- camera position is " + cameraPosition.target.latitude + "/" + cameraPosition.target.longitude);
+        if (mMap != null) {
+            mSearchManager.startSearchTeam(mMap, cameraPosition.target);
+        }
     }
 }
