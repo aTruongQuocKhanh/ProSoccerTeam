@@ -28,6 +28,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.khanhtq.prosoccerteam.R;
 import com.khanhtq.prosoccerteam.adapters.TeamInfoWindowAdapter;
@@ -40,6 +41,7 @@ import com.khanhtq.prosoccerteam.util.SearchLocationManager;
 public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLocationButtonClickListener,
         OnMapReadyCallback,
         GoogleMap.OnCameraChangeListener,
+        GoogleMap.OnMarkerClickListener,
         LocationListener {
     public static final String TAG = MainActivity.class.getSimpleName();
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
@@ -54,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
     private LocationManager mLocationManager;
     private AdRequest mAdRequest;
     private SearchLocationManager mSearchManager;
+    private Marker mLastClickedMarker = null;
     private boolean isFirstOpen = true;
 
     @Override
@@ -113,6 +116,7 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         mMap = googleMap;
         mMap.setInfoWindowAdapter(new TeamInfoWindowAdapter(this));
         mMap.setOnCameraChangeListener(this);
+        mMap.setOnMarkerClickListener(this);
         enableMyLocation();
     }
 
@@ -156,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         double longitude = location.getLongitude();
         LatLng newPos = new LatLng(latitude, longitude);
         if (mMap != null) {
-            mSearchManager.startSearchTeam(mMap, newPos);
+            SearchLocationManager.startSearchTeam(mMap, newPos);
             if (isFirstOpen) {
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(newPos));
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
@@ -189,7 +193,13 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
     public void onCameraChange(CameraPosition cameraPosition) {
         Log.d(TAG, "onCameraChange --- camera position is " + cameraPosition.target.latitude + "/" + cameraPosition.target.longitude);
         if (mMap != null) {
-            mSearchManager.startSearchTeam(mMap, cameraPosition.target);
+            SearchLocationManager.startSearchTeam(mMap, cameraPosition.target);
         }
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        mLastClickedMarker = marker;
+        return false;
     }
 }

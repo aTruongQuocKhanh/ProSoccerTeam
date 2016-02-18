@@ -7,6 +7,7 @@ import android.os.Message;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.khanhtq.prosoccerteam.items.Team;
 
@@ -60,7 +61,7 @@ public class SearchLocationManager {
                         case SEARCH_TEAM_COMPLETE:
                             if (results != null && results.size() > 0) {
                                 for (Team team : results) {
-                                    googleMap.addMarker(new MarkerOptions()
+                                    Marker marker = googleMap.addMarker(new MarkerOptions()
                                             .position(team.getAddress())
                                             .title(team.getName())
                                             .icon(BitmapDescriptorFactory.fromResource(team.getIconDrawable()))
@@ -97,12 +98,6 @@ public class SearchLocationManager {
         } else {
             mInstance.handleState(searchTask, SEARCH_TEAM_COMPLETE);
         }
-    }
-
-    public static void removeSearchTask(SearchTask searchTask) {
-        if (searchTask != null) {
-        }
-
     }
 
     void handleState(SearchTask searchTask, int state) {
