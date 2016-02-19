@@ -1,6 +1,7 @@
 package com.khanhtq.prosoccerteam.activities;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
@@ -8,10 +9,12 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -42,7 +45,9 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         OnMapReadyCallback,
         GoogleMap.OnCameraChangeListener,
         GoogleMap.OnMarkerClickListener,
-        LocationListener {
+        GoogleMap.OnInfoWindowClickListener,
+        LocationListener,
+        NavigationView.OnNavigationItemSelectedListener{
     public static final String TAG = MainActivity.class.getSimpleName();
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
@@ -50,12 +55,13 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
     private AdView mAdView;
     private Toolbar mToolbar;
     private DrawerLayout mDrawerlayout;
+    private NavigationView mNavigationView;
+    private ActionBarDrawerToggle mDrawerToggle;
 
     private Handler mHandler;
     private GoogleMap mMap;
     private LocationManager mLocationManager;
     private AdRequest mAdRequest;
-    private SearchLocationManager mSearchManager;
     private Marker mLastClickedMarker = null;
     private boolean isFirstOpen = true;
 
@@ -64,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mDrawerlayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mNavigationView = (NavigationView) findViewById(R.id.navigationView);
         // show header view
         mToolbar = (Toolbar) findViewById(R.id.toolbar_layout);
         mToolbar.setTitle("");
@@ -78,7 +85,11 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         mHandler = new Handler();
         hideSplash();
 
-        mSearchManager = SearchLocationManager.getInstance();
+        SearchLocationManager.getInstance();
+        mNavigationView.setNavigationItemSelectedListener(this);
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerlayout, mToolbar, R.string.app_name, R.string.app_name);
+        mDrawerlayout.setDrawerListener(mDrawerToggle);
+        mDrawerToggle.syncState();
 
         // load map
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -117,6 +128,7 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         mMap.setInfoWindowAdapter(new TeamInfoWindowAdapter(this));
         mMap.setOnCameraChangeListener(this);
         mMap.setOnMarkerClickListener(this);
+        mMap.setOnInfoWindowClickListener(this);
         enableMyLocation();
     }
 
@@ -160,10 +172,10 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         double longitude = location.getLongitude();
         LatLng newPos = new LatLng(latitude, longitude);
         if (mMap != null) {
-            SearchLocationManager.startSearchTeam(mMap, newPos);
+            SearchLocationManager.startSearchTeam(mNavigationView.getMenu(), mMap, newPos);
             if (isFirstOpen) {
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(newPos));
-                mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+                mMap.animateCamera(CameraUpdateFactory.zoomTo(10));
             }
         }
     }
@@ -193,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
     public void onCameraChange(CameraPosition cameraPosition) {
         Log.d(TAG, "onCameraChange --- camera position is " + cameraPosition.target.latitude + "/" + cameraPosition.target.longitude);
         if (mMap != null) {
-            SearchLocationManager.startSearchTeam(mMap, cameraPosition.target);
+            SearchLocationManager.startSearchTeam(mNavigationView.getMenu(), mMap, cameraPosition.target);
         }
     }
 
@@ -201,5 +213,19 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
     public boolean onMarkerClick(Marker marker) {
         mLastClickedMarker = marker;
         return false;
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        Log.d(TAG, "onInfoWindowClick at marker " + marker.getTitle());
+        Intent webIntent = new Intent(this, WebViewActivity.class);
+        webIntent.putExtra(WebViewActivity.URL_KEY, marker.getSnippet());
+        startActivity(webIntent);
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        mDrawerlayout.closeDrawers();
+        return true;
     }
 }

@@ -1,6 +1,5 @@
 package com.khanhtq.prosoccerteam.util;
 
-import android.os.*;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -31,7 +30,7 @@ public class SearchTeamRunnable implements Runnable {
          * Defines the action for each state of Search Team Task instance.
          * @param state The current State of the Task.
          */
-        void handleSearchState(int state);
+        void handleSearchTeamState(int state);
     }
 
     private TaskSearchTeamMethods mSearchTeamTask;
@@ -43,12 +42,11 @@ public class SearchTeamRunnable implements Runnable {
     @Override
     public void run() {
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-        mSearchTeamTask.handleSearchState(SearchLocationManager.SEARCH_TEAM_STARTED);
+        mSearchTeamTask.handleSearchTeamState(SearchLocationManager.SEARCH_TEAM_STARTED);
         final LatLng currentPosition = mSearchTeamTask.getCurrentPosition();
         List<Team> results = new ArrayList<Team>();
         if (currentPosition != null) {
             for (Team team : Constants.TEAM_LIST) {
-                LatLng teamPos = team.getAddress();
                 double distance = team.calculateByDistance(currentPosition);
                 if (distance < Constants.TEAM_MAX_DISTANCE) {
                     results.add(team);
@@ -56,7 +54,7 @@ public class SearchTeamRunnable implements Runnable {
             }
             Log.d(TAG, "Search results size: " + results.size());
             mSearchTeamTask.setTeamList(results);
-            mSearchTeamTask.handleSearchState(SearchLocationManager.SEARCH_TEAM_COMPLETE);
+            mSearchTeamTask.handleSearchTeamState(SearchLocationManager.SEARCH_TEAM_COMPLETE);
         }
     }
 }

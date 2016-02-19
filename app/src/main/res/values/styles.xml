@@ -8,4 +8,9 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="MenuTheme" parent="Theme.AppCompat.Light">
+        <item name="android:textSize">@dimen/menu_item_text_size</item>
+        <item name="android:textColor">@color/toolbarTitle</item>
+    </style>
+
 </resources>

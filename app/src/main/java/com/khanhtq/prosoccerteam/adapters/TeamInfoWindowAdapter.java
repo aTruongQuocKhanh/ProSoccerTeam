@@ -3,12 +3,14 @@ package com.khanhtq.prosoccerteam.adapters;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.view.View;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Marker;
 import com.khanhtq.prosoccerteam.R;
+import com.khanhtq.prosoccerteam.activities.WebViewActivity;
 import com.khanhtq.prosoccerteam.items.Team;
 import com.khanhtq.prosoccerteam.util.Constants;
 
@@ -58,6 +60,10 @@ public class TeamInfoWindowAdapter implements GoogleMap.InfoWindowAdapter, View.
 
     @Override
     public void onClick(View v) {
-
+        TextView temp = (TextView) v;
+        String url = temp.getText().toString();
+        Intent webviewIntent = new Intent(mActivity, WebViewActivity.class);
+        webviewIntent.putExtra(WebViewActivity.URL_KEY, url);
+        mActivity.startActivity(webviewIntent);
     }
 }
