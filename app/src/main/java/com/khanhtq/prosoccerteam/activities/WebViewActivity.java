@@ -10,6 +10,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.khanhtq.prosoccerteam.R;
 
@@ -52,8 +53,11 @@ public class WebViewActivity extends AppCompatActivity {
         Bundle extra = getIntent().getExtras();
         if (extra != null) {
             String url = extra.getString(URL_KEY);
-            if (url != null) {
+            if (url != null && url.length() > 0) {
                 mWebView.loadUrl(url);
+            } else {
+                Toast.makeText(this, getResources().getString(R.string.no_link_error), Toast.LENGTH_LONG).show();
+                finish();
             }
         }
     }

@@ -28,13 +28,12 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.khanhtq.prosoccerteam.R;
 import com.khanhtq.prosoccerteam.adapters.TeamInfoWindowAdapter;
+import com.khanhtq.prosoccerteam.items.Country;
 import com.khanhtq.prosoccerteam.util.Constants;
 import com.khanhtq.prosoccerteam.util.SearchLocationManager;
 
@@ -47,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         GoogleMap.OnMarkerClickListener,
         GoogleMap.OnInfoWindowClickListener,
         LocationListener,
-        NavigationView.OnNavigationItemSelectedListener{
+        NavigationView.OnNavigationItemSelectedListener {
     public static final String TAG = MainActivity.class.getSimpleName();
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
@@ -63,7 +62,6 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
     private LocationManager mLocationManager;
     private AdRequest mAdRequest;
     private Marker mLastClickedMarker = null;
-    private boolean isFirstOpen = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,9 +147,8 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
             Location location = mLocationManager.getLastKnownLocation(provider);
             if (location != null) {
                 onLocationChanged(location);
-                isFirstOpen = false;
             }
-            mLocationManager.requestLocationUpdates(provider, 10000, 0, this);
+            mLocationManager.requestLocationUpdates(provider, Constants.UPDATE_LOCATION_TIME, 0, this);
         }
     }
 
@@ -172,17 +169,13 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         double longitude = location.getLongitude();
         LatLng newPos = new LatLng(latitude, longitude);
         if (mMap != null) {
-            SearchLocationManager.startSearchTeam(mNavigationView.getMenu(), mMap, newPos);
-            if (isFirstOpen) {
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(newPos));
-                mMap.animateCamera(CameraUpdateFactory.zoomTo(10));
-            }
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(newPos));
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(Constants.DEFAULT_ZOOM_LEVEL));
         }
     }
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-
     }
 
     @Override
@@ -205,6 +198,7 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
     public void onCameraChange(CameraPosition cameraPosition) {
         Log.d(TAG, "onCameraChange --- camera position is " + cameraPosition.target.latitude + "/" + cameraPosition.target.longitude);
         if (mMap != null) {
+            SearchLocationManager.recalculateDistanceZoomLevel(cameraPosition.zoom);
             SearchLocationManager.startSearchTeam(mNavigationView.getMenu(), mMap, cameraPosition.target);
         }
     }
@@ -225,6 +219,17 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
+        String countryName = item.getTitle().toString();
+        LatLng countryPos = null;
+        for (Country country : Constants.COUNTRIES) {
+            if (countryName.equals(country.getName())) {
+                countryPos = country.getLocation();
+            }
+        }
+        if (countryPos != null) {
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(countryPos));
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(Constants.DEFAULT_ZOOM_LEVEL));
+        }
         mDrawerlayout.closeDrawers();
         return true;
     }

@@ -67,6 +67,8 @@ public class SearchLocationManager {
 
     private static SearchLocationManager mInstance;
 
+    public static float mDistanceZoomLevel = 1;
+
     static {
         KEEP_ALIVE_TIME_UNIT = TimeUnit.SECONDS;
     }
@@ -125,6 +127,10 @@ public class SearchLocationManager {
             mInstance = new SearchLocationManager();
         }
         return mInstance;
+    }
+
+    public static void recalculateDistanceZoomLevel(float newZoomLevel) {
+        mDistanceZoomLevel = Constants.DEFAULT_ZOOM_LEVEL / newZoomLevel;
     }
 
     public static void startSearchTeam(Menu menu, GoogleMap map, LatLng position) {
