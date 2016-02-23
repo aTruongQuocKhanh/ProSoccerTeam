@@ -17,7 +17,7 @@ import com.khanhtq.prosoccerteam.util.Constants;
 /**
  * Created by khanhtq on 2/18/16.
  */
-public class TeamInfoWindowAdapter implements GoogleMap.InfoWindowAdapter, View.OnClickListener {
+public class TeamInfoWindowAdapter implements GoogleMap.InfoWindowAdapter{
     private static final String TAG = TeamInfoWindowAdapter.class.getSimpleName();
 
     private Activity mActivity;
@@ -45,8 +45,6 @@ public class TeamInfoWindowAdapter implements GoogleMap.InfoWindowAdapter, View.
             TextView mDescTextView = (TextView) view.findViewById(R.id.team_desc_txt_view);
             TextView mLinkTextView = (TextView) view.findViewById(R.id.team_link_txt_view);
             TextView mWikiTextView = (TextView) view.findViewById(R.id.team_wiki_txt_view);
-            mLinkTextView.setOnClickListener(this);
-            mWikiTextView.setOnClickListener(this);
             for (Team team : Constants.TEAM_LIST) {
                 if (team.isPosition(marker.getPosition())) {
                     mNameTextView.setText(team.getName());
@@ -56,14 +54,5 @@ public class TeamInfoWindowAdapter implements GoogleMap.InfoWindowAdapter, View.
                 }
             }
         }
-    }
-
-    @Override
-    public void onClick(View v) {
-        TextView temp = (TextView) v;
-        String url = temp.getText().toString();
-        Intent webviewIntent = new Intent(mActivity, WebViewActivity.class);
-        webviewIntent.putExtra(WebViewActivity.URL_KEY, url);
-        mActivity.startActivity(webviewIntent);
     }
 }

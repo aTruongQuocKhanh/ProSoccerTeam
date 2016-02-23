@@ -3,6 +3,7 @@ package com.khanhtq.prosoccerteam.items;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 
 import java.text.DecimalFormat;
 
@@ -13,10 +14,12 @@ public class Country {
     private String mName;
     private LatLng mLocation;
     private double mDistance;
+    private LatLngBounds mBound;
 
-    public Country (String name, LatLng location) {
+    public Country (String name, LatLng location, LatLngBounds bound) {
         mName = name;
         mLocation = location;
+        mBound = bound;
     }
 
     public String getName() {
@@ -29,6 +32,10 @@ public class Country {
 
     public double getDistance() {
         return mDistance;
+    }
+
+    public LatLngBounds getBound() {
+        return mBound;
     }
 
     public void calculateByDistance(LatLng latLng) {

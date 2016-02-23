@@ -20,7 +20,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -40,8 +39,7 @@ import com.khanhtq.prosoccerteam.util.SearchLocationManager;
 /**
  * Created by khanhtq on 2/16/16.
  */
-public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLocationButtonClickListener,
-        OnMapReadyCallback,
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
         GoogleMap.OnCameraChangeListener,
         GoogleMap.OnMarkerClickListener,
         GoogleMap.OnInfoWindowClickListener,
@@ -189,16 +187,10 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
     }
 
     @Override
-    public boolean onMyLocationButtonClick() {
-        Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
-        return false;
-    }
-
-    @Override
     public void onCameraChange(CameraPosition cameraPosition) {
         Log.d(TAG, "onCameraChange --- camera position is " + cameraPosition.target.latitude + "/" + cameraPosition.target.longitude);
         if (mMap != null) {
-            SearchLocationManager.recalculateDistanceZoomLevel(cameraPosition.zoom);
+            SearchLocationManager.recalculateDistanceByZoomLevel(cameraPosition.zoom);
             SearchLocationManager.startSearchTeam(mNavigationView.getMenu(), mMap, cameraPosition.target);
         }
     }
@@ -220,15 +212,15 @@ public class MainActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         String countryName = item.getTitle().toString();
-        LatLng countryPos = null;
-        for (Country country : Constants.COUNTRIES) {
-            if (countryName.equals(country.getName())) {
-                countryPos = country.getLocation();
+        Country country = null;
+        for (Country c : Constants.COUNTRIES) {
+            if (countryName.equals(c.getName())) {
+                country = c;
+                break;
             }
         }
-        if (countryPos != null) {
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(countryPos));
-            mMap.animateCamera(CameraUpdateFactory.zoomTo(Constants.DEFAULT_ZOOM_LEVEL));
+        if (country != null && mMap != null) {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(country.getBound(), 50));
         }
         mDrawerlayout.closeDrawers();
         return true;

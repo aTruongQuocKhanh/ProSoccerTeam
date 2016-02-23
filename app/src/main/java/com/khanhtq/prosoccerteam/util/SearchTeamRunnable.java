@@ -48,7 +48,7 @@ public class SearchTeamRunnable implements Runnable {
         if (currentPosition != null) {
             for (Team team : Constants.TEAM_LIST) {
                 double distance = team.calculateByDistance(currentPosition);
-                if (distance < Constants.TEAM_MAX_DISTANCE * SearchLocationManager.mDistanceZoomLevel) {
+                if (distance < SearchLocationManager.mDistanceByZoomLevel) {
                     results.add(team);
                 }
             }

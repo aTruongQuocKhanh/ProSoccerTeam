@@ -1,22 +1,14 @@
 package com.khanhtq.prosoccerteam.util;
 
-import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.support.v7.view.menu.ActionMenuItem;
-import android.view.ActionProvider;
-import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.SubMenu;
-import android.view.View;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.khanhtq.prosoccerteam.R;
 import com.khanhtq.prosoccerteam.items.Country;
@@ -24,9 +16,7 @@ import com.khanhtq.prosoccerteam.items.Team;
 
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -67,7 +57,7 @@ public class SearchLocationManager {
 
     private static SearchLocationManager mInstance;
 
-    public static float mDistanceZoomLevel = 1;
+    public static float mDistanceByZoomLevel = 1;
 
     static {
         KEEP_ALIVE_TIME_UNIT = TimeUnit.SECONDS;
@@ -129,8 +119,9 @@ public class SearchLocationManager {
         return mInstance;
     }
 
-    public static void recalculateDistanceZoomLevel(float newZoomLevel) {
-        mDistanceZoomLevel = Constants.DEFAULT_ZOOM_LEVEL / newZoomLevel;
+    public static void recalculateDistanceByZoomLevel(float newZoomLevel) {
+        float equatorInDp = 256 * ((float) Math.pow(2, newZoomLevel));
+        mDistanceByZoomLevel = ((Constants.DEFAULT_DISTANCE_IN_DP * Constants.EQUATOR_LENGTH) / equatorInDp);
     }
 
     public static void startSearchTeam(Menu menu, GoogleMap map, LatLng position) {
