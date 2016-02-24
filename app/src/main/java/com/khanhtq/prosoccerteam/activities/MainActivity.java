@@ -30,10 +30,12 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.khanhtq.appcore.activities.WebViewActivity;
+import com.khanhtq.appcore.item.Country;
+import com.khanhtq.appcore.util.Constants;
 import com.khanhtq.prosoccerteam.R;
-import com.khanhtq.prosoccerteam.adapters.TeamInfoWindowAdapter;
-import com.khanhtq.prosoccerteam.items.Country;
-import com.khanhtq.prosoccerteam.util.Constants;
+import com.khanhtq.appcore.adapters.TeamInfoWindowAdapter;
+import com.khanhtq.prosoccerteam.adapter.ArenaTeamInfoWindowAdapter;
 import com.khanhtq.prosoccerteam.util.SearchLocationManager;
 
 /**
@@ -121,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.setInfoWindowAdapter(new TeamInfoWindowAdapter(this));
+        mMap.setInfoWindowAdapter(new ArenaTeamInfoWindowAdapter(this));
         mMap.setOnCameraChangeListener(this);
         mMap.setOnMarkerClickListener(this);
         mMap.setOnInfoWindowClickListener(this);

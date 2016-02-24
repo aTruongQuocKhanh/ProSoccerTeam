@@ -4,11 +4,13 @@ import android.view.Menu;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
-import com.khanhtq.prosoccerteam.items.Country;
-import com.khanhtq.prosoccerteam.items.Team;
+import com.khanhtq.appcore.item.Country;
+import com.khanhtq.appcore.item.League;
+import com.khanhtq.appcore.item.Team;
+import com.khanhtq.appcore.util.SearchCountryRunnable;
+import com.khanhtq.appcore.util.SearchTeamRunnable;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -26,17 +28,17 @@ public class SearchTask implements SearchTeamRunnable.TaskSearchTeamMethods,
 
     private List<Country> mCountryList = null;
 
-    private SearchTeamRunnable mSearchTeamRunnable;
+    private ArenaSearchTeamRunnable mSearchTeamRunnable;
 
-    private SearchCountryRunnable mSearchCountryRunnable;
+    private ArenaSearchCountryRunnable mSearchCountryRunnable;
 
     private LatLng mCurrentPosition;
 
     private Thread mCurrentThread;
 
     SearchTask() {
-        mSearchTeamRunnable = new SearchTeamRunnable(this);
-        mSearchCountryRunnable = new SearchCountryRunnable(this);
+        mSearchTeamRunnable = new ArenaSearchTeamRunnable(this);
+        mSearchCountryRunnable = new ArenaSearchCountryRunnable(this);
     }
 
     void initializeSearchTeamTask(SearchLocationManager manager,
@@ -64,6 +66,11 @@ public class SearchTask implements SearchTeamRunnable.TaskSearchTeamMethods,
         synchronized (mSearchLocationManager) {
             mCurrentThread = thread;
         }
+    }
+
+    @Override
+    public League getCurrentLeague() {
+        return null;
     }
 
     @Override

@@ -1,1 +1,1 @@
-include ':app', ':americaarenas'
+include ':app', ':americaarenas', ':appcore'
