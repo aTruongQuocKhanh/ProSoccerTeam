@@ -21,8 +21,6 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -30,28 +28,33 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.maps.android.clustering.ClusterManager;
 import com.khanhtq.appcore.activities.WebViewActivity;
 import com.khanhtq.appcore.item.Country;
+import com.khanhtq.appcore.item.Team;
+import com.khanhtq.appcore.util.TeamRender;
 import com.khanhtq.appcore.util.Constants;
+import com.khanhtq.appcore.view.ViewInterface;
 import com.khanhtq.prosoccerteam.R;
-import com.khanhtq.appcore.adapters.TeamInfoWindowAdapter;
 import com.khanhtq.prosoccerteam.adapter.ArenaTeamInfoWindowAdapter;
 import com.khanhtq.prosoccerteam.util.SearchLocationManager;
+
+import java.util.List;
 
 /**
  * Created by khanhtq on 2/16/16.
  */
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
         GoogleMap.OnCameraChangeListener,
-        GoogleMap.OnMarkerClickListener,
-        GoogleMap.OnInfoWindowClickListener,
         LocationListener,
-        NavigationView.OnNavigationItemSelectedListener {
+        ClusterManager.OnClusterItemInfoWindowClickListener<Team>,
+        ClusterManager.OnClusterItemClickListener<Team>,
+        NavigationView.OnNavigationItemSelectedListener,
+        ViewInterface.CallBackView<Team> {
     public static final String TAG = MainActivity.class.getSimpleName();
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
     private View mSplashView;
-    private AdView mAdView;
     private Toolbar mToolbar;
     private DrawerLayout mDrawerlayout;
     private NavigationView mNavigationView;
@@ -60,8 +63,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Handler mHandler;
     private GoogleMap mMap;
     private LocationManager mLocationManager;
-    private AdRequest mAdRequest;
-    private Marker mLastClickedMarker = null;
+    private ClusterManager<Team> mClusterManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +71,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_main);
         mDrawerlayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mNavigationView = (NavigationView) findViewById(R.id.navigationView);
+
+        setupActionBar();
+
+        mHandler = new Handler();
+
+        handleSplash();
+
+        SearchLocationManager.getInstance().setViewCallback(this);
+
+        setupNavigationBar();
+
+        setupMap();
+    }
+
+    private void setupActionBar() {
         // show header view
         mToolbar = (Toolbar) findViewById(R.id.toolbar_layout);
         mToolbar.setTitle("");
@@ -78,35 +95,32 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-
-        mSplashView = findViewById(R.id.splash_layout);
-        mHandler = new Handler();
-        hideSplash();
-
-        SearchLocationManager.getInstance();
-        mNavigationView.setNavigationItemSelectedListener(this);
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerlayout, mToolbar, R.string.app_name, R.string.app_name);
-        mDrawerlayout.setDrawerListener(mDrawerToggle);
-        mDrawerToggle.syncState();
-
-        // load map
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-        mAdView = (AdView) findViewById(R.id.adView);
-        mAdRequest = new AdRequest.Builder().build();
     }
 
-    private void hideSplash() {
+    private void handleSplash() {
+        mSplashView = findViewById(R.id.splash_layout);
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 if (mSplashView.getVisibility() != View.GONE) {
                     mSplashView.animate().setDuration(500).alpha(0).start();
                     mSplashView.setVisibility(View.GONE);
-                    mAdView.loadAd(mAdRequest);
                 }
             }
         }, 500);
+    }
+
+    private void setupNavigationBar() {
+        mNavigationView.setNavigationItemSelectedListener(this);
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerlayout, mToolbar, R.string.app_name, R.string.app_name);
+        mDrawerlayout.setDrawerListener(mDrawerToggle);
+        mDrawerToggle.syncState();
+    }
+
+    private void setupMap() {
+        // load map
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
     }
 
     @Override
@@ -123,10 +137,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mClusterManager = new ClusterManager<Team>(this, mMap);
+        mClusterManager.setRenderer(new TeamRender(this, mMap, mClusterManager));
         mMap.setInfoWindowAdapter(new ArenaTeamInfoWindowAdapter(this));
         mMap.setOnCameraChangeListener(this);
-        mMap.setOnMarkerClickListener(this);
-        mMap.setOnInfoWindowClickListener(this);
+        mMap.setOnMarkerClickListener(mClusterManager);
+        mMap.setOnInfoWindowClickListener(mClusterManager);
+        mClusterManager.setOnClusterItemInfoWindowClickListener(this);
         enableMyLocation();
     }
 
@@ -198,20 +215,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
-    public boolean onMarkerClick(Marker marker) {
-        mLastClickedMarker = marker;
-        return false;
-    }
-
-    @Override
-    public void onInfoWindowClick(Marker marker) {
-        Log.d(TAG, "onInfoWindowClick at marker " + marker.getTitle());
-        Intent webIntent = new Intent(this, WebViewActivity.class);
-        webIntent.putExtra(WebViewActivity.URL_KEY, marker.getSnippet());
-        startActivity(webIntent);
-    }
-
-    @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         String countryName = item.getTitle().toString();
         Country country = null;
@@ -226,5 +229,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         mDrawerlayout.closeDrawers();
         return true;
+    }
+
+    @Override
+    public void callBack(List<Team> datas) {
+        for (Team t : datas) {
+            mClusterManager.addItem(t);
+        }
+        mClusterManager.cluster();
+    }
+
+    @Override
+    public void onClusterItemInfoWindowClick(Team team) {
+        Intent webIntent = new Intent(this, WebViewActivity.class);
+        webIntent.putExtra(WebViewActivity.URL_KEY, team.getWebAddress());
+        startActivity(webIntent);
+    }
+
+    @Override
+    public boolean onClusterItemClick(Team team) {
+        return false;
     }
 }

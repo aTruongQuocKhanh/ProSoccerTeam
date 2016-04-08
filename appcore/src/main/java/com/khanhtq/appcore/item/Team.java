@@ -3,45 +3,48 @@ package com.khanhtq.appcore.item;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.android.clustering.ClusterItem;
 
 import java.text.DecimalFormat;
+
+import io.realm.RealmObject;
 
 /**
  * Created by khanhtq on 2/17/16.
  */
-public class Team {
-    private String mName;
-    private League mLeague;
-    private LatLng mAddress;
-    private String mDescription;
+public class Team implements ClusterItem {
+    private String name;
+    private League league;
+    private LatLng address;
+    private String description;
     private String mWebAddress;
     private String mWikiAddress;
     private int mIconDrawable;
 
     public Team(String name, League league, LatLng address, String description, String webAddress, String wikiAddress, int iconDrawable) {
-        mName = name;
-        mLeague = league;
-        mAddress = address;
-        mDescription = description;
+        this.name = name;
+        this.league = league;
+        this.address = address;
+        this.description = description;
         mWebAddress = webAddress;
         mWikiAddress = wikiAddress;
         mIconDrawable = iconDrawable;
     }
 
     public String getName() {
-        return mName;
+        return name;
     }
 
     public League getLeague() {
-        return mLeague;
+        return league;
     }
 
     public LatLng getAddress() {
-        return mAddress;
+        return address;
     }
 
     public String getDescription() {
-        return mDescription;
+        return description;
     }
 
     public String getWebAddress() {
@@ -57,14 +60,14 @@ public class Team {
     }
 
     public boolean isPosition(LatLng latLng) {
-        return (mAddress != null && mAddress.latitude == latLng.latitude && mAddress.longitude == latLng.longitude);
+        return (address != null && address.latitude == latLng.latitude && address.longitude == latLng.longitude);
     }
 
     public double calculateByDistance(LatLng latLng) {
         int Radius = 6371;// radius of earth in Km
-        double lat1 = mAddress.latitude;
+        double lat1 = address.latitude;
         double lat2 = latLng.latitude;
-        double lon1 = mAddress.longitude;
+        double lon1 = address.longitude;
         double lon2 = latLng.longitude;
         double dLat = Math.toRadians(lat2 - lat1);
         double dLon = Math.toRadians(lon2 - lon1);
@@ -85,4 +88,8 @@ public class Team {
         return Radius * c;
     }
 
+    @Override
+    public LatLng getPosition() {
+        return address;
+    }
 }

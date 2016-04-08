@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="menu_item_text_size">18sp</dimen>
+    <dimen name="footer_height">72dp</dimen>
+    <dimen name="footer_padding">8dp</dimen>
 </resources>

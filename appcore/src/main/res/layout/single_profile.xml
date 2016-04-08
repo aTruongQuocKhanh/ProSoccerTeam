@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="2dp">
+
+    <com.khanhtq.appcore.view.RoundedImageView
+        android:id="@+id/profile_image"
+        android:layout_width="@dimen/custom_profile_image"
+        android:layout_height="@dimen/custom_profile_image"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="3dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="1dp"
+        android:layout_marginTop="3dp"/>
+</RelativeLayout>

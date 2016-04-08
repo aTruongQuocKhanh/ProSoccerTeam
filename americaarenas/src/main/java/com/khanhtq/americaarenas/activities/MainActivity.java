@@ -16,14 +16,13 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -32,31 +31,36 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
+import com.google.maps.android.clustering.ClusterManager;
 import com.khanhtq.americaarenas.R;
 import com.khanhtq.americaarenas.adapters.AmericaTeamInfoWindowAdapter;
 import com.khanhtq.americaarenas.utils.SearchLocationManager;
 import com.khanhtq.appcore.activities.WebViewActivity;
-import com.khanhtq.appcore.adapters.TeamInfoWindowAdapter;
-import com.khanhtq.appcore.item.Country;
 import com.khanhtq.appcore.item.League;
+import com.khanhtq.appcore.item.Team;
 import com.khanhtq.appcore.util.Constants;
+import com.khanhtq.appcore.util.FooterManager;
+import com.khanhtq.appcore.util.TeamRender;
+import com.khanhtq.appcore.view.ViewInterface;
+
+import java.util.List;
 
 /**
  * Created by khanhtq on 2/23/16.
  */
-public class MainActivity extends AppCompatActivity  implements OnMapReadyCallback,
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
         GoogleMap.OnCameraChangeListener,
-        GoogleMap.OnMarkerClickListener,
-        GoogleMap.OnInfoWindowClickListener,
         LocationListener,
-        NavigationView.OnNavigationItemSelectedListener {
+        ClusterManager.OnClusterItemInfoWindowClickListener<Team>,
+        ClusterManager.OnClusterItemClickListener<Team>,
+        NavigationView.OnNavigationItemSelectedListener,
+        ViewInterface.CallBackView<Team>  {
     public static final String TAG = MainActivity.class.getSimpleName();
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private static final LatLngBounds UNITED_STATES = new LatLngBounds(new LatLng(18.9106768, 172.4458955), new LatLng(71.3867745, -66.9502861));
     private static final String ORDER_KEY = "ORDER";
 
     private View mSplashView;
-    private AdView mAdView;
     private Toolbar mToolbar;
     private DrawerLayout mDrawerlayout;
     private NavigationView mNavigationView;
@@ -65,16 +69,33 @@ public class MainActivity extends AppCompatActivity  implements OnMapReadyCallba
     private Handler mHandler;
     private GoogleMap mMap;
     private LocationManager mLocationManager;
-    private AdRequest mAdRequest;
     private League mCurrentLeague;
+    private ClusterManager<Team> mClusterManager;
+    private FooterManager mFooterManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mDrawerlayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mNavigationView = (NavigationView) findViewById(R.id.navigationView);
-        // show header view
+
+        mCurrentLeague = Constants.ALL_LEAGUE;
+        mHandler = new Handler();
+
+        setupActionBar();
+        hideSplash();
+
+        SearchLocationManager.getInstance().setViewCallback(this);
+
+        setupNavigationView();
+        initializeMenu();
+        setupFooter();
+        setupMap();
+    }
+
+    /**
+     * Set up support toolbar.
+     */
+    private void setupActionBar() {
         mToolbar = (Toolbar) findViewById(R.id.toolbar_layout);
         mToolbar.setTitle("");
         setSupportActionBar(mToolbar);
@@ -83,39 +104,26 @@ public class MainActivity extends AppCompatActivity  implements OnMapReadyCallba
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-
-        mSplashView = findViewById(R.id.splash_layout);
-        mHandler = new Handler();
-        hideSplash();
-
-        mCurrentLeague = Constants.ALL_LEAGUE;
-        SearchLocationManager.getInstance();
-        initializeMenu();
-        mNavigationView.setNavigationItemSelectedListener(this);
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerlayout, mToolbar, R.string.app_name, R.string.app_name);
-        mDrawerlayout.setDrawerListener(mDrawerToggle);
-        mDrawerToggle.syncState();
-
-        // load map
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-        mAdView = (AdView) findViewById(R.id.adView);
-        mAdRequest = new AdRequest.Builder().build();
     }
 
+    /**
+     * Hide splash screen after 2000ms.
+     */
     private void hideSplash() {
+        mSplashView = findViewById(R.id.splash_layout);
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 if (mSplashView.getVisibility() != View.GONE) {
-                    mSplashView.animate().setDuration(500).alpha(0).start();
                     mSplashView.setVisibility(View.GONE);
-                    mAdView.loadAd(mAdRequest);
                 }
             }
-        }, 500);
+        }, 2000);
     }
 
+    /**
+     * Initialize navigation menu
+     */
     private void initializeMenu() {
         Menu menu = mNavigationView.getMenu();
         for (int i = 0; i < Constants.AMERICA_LEAGUE.length; i++) {
@@ -125,6 +133,31 @@ public class MainActivity extends AppCompatActivity  implements OnMapReadyCallba
             item.setIcon(getResources().getDrawable(R.drawable.menu_icon));
             item.setIntent(action);
         }
+    }
+
+    /**
+     * Set up left navigation.
+     */
+    private void setupNavigationView() {
+        mDrawerlayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mNavigationView = (NavigationView) findViewById(R.id.navigationView);
+        mNavigationView.setNavigationItemSelectedListener(this);
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerlayout, mToolbar, R.string.app_name, R.string.app_name);
+        mDrawerlayout.setDrawerListener(mDrawerToggle);
+        mDrawerToggle.syncState();
+    }
+
+    /**
+     * Load map async
+     */
+    private void setupMap() {
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+    }
+
+    private void setupFooter() {
+        RecyclerView mFooterListView = (RecyclerView) findViewById(R.id.footer_team_recyclerview);
+        mFooterManager = new FooterManager(this, mFooterListView);
     }
 
     @Override
@@ -141,10 +174,13 @@ public class MainActivity extends AppCompatActivity  implements OnMapReadyCallba
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mClusterManager = new ClusterManager<Team>(this, mMap);
+        mClusterManager.setRenderer(new TeamRender(this, mMap, mClusterManager));
         mMap.setInfoWindowAdapter(new AmericaTeamInfoWindowAdapter(this));
         mMap.setOnCameraChangeListener(this);
-        mMap.setOnMarkerClickListener(this);
-        mMap.setOnInfoWindowClickListener(this);
+        mMap.setOnMarkerClickListener(mClusterManager);
+        mMap.setOnInfoWindowClickListener(mClusterManager);
+        mClusterManager.setOnClusterItemInfoWindowClickListener(this);
         enableMyLocation();
     }
 
@@ -216,19 +252,6 @@ public class MainActivity extends AppCompatActivity  implements OnMapReadyCallba
     }
 
     @Override
-    public boolean onMarkerClick(Marker marker) {
-        return false;
-    }
-
-    @Override
-    public void onInfoWindowClick(Marker marker) {
-        Log.d(TAG, "onInfoWindowClick at marker " + marker.getTitle());
-        Intent webIntent = new Intent(this, WebViewActivity.class);
-        webIntent.putExtra(WebViewActivity.URL_KEY, marker.getSnippet());
-        startActivity(webIntent);
-    }
-
-    @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         Intent intent = item.getIntent();
         if (intent == null || !intent.hasExtra(ORDER_KEY)) {
@@ -244,5 +267,26 @@ public class MainActivity extends AppCompatActivity  implements OnMapReadyCallba
         }
         mDrawerlayout.closeDrawers();
         return true;
+    }
+
+    @Override
+    public boolean onClusterItemClick(Team team) {
+        return false;
+    }
+
+    @Override
+    public void onClusterItemInfoWindowClick(Team team) {
+        Intent webIntent = new Intent(this, WebViewActivity.class);
+        webIntent.putExtra(WebViewActivity.URL_KEY, team.getWebAddress());
+        startActivity(webIntent);
+    }
+
+    @Override
+    public void callBack(List<Team> teams) {
+        for (Team t : teams) {
+            mClusterManager.addItem(t);
+        }
+        mClusterManager.cluster();
+        mFooterManager.addTeam(teams);
     }
 }

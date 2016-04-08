@@ -13,6 +13,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.khanhtq.appcore.item.Country;
 import com.khanhtq.appcore.item.Team;
 import com.khanhtq.appcore.util.Constants;
+import com.khanhtq.appcore.view.ViewInterface;
 import com.khanhtq.prosoccerteam.R;
 
 import java.util.List;
@@ -58,6 +59,8 @@ public class SearchLocationManager {
 
     private static SearchLocationManager mInstance;
 
+    private static ViewInterface.CallBackView<Team> mCallBackView;
+
     public static float mDistanceByZoomLevel = 1;
 
     static {
@@ -87,14 +90,15 @@ public class SearchLocationManager {
                     switch (msg.what) {
                         case SEARCH_COMPLETE:
                             if (teams != null && teams.size() > 0) {
-                                for (Team team : teams) {
+                                mCallBackView.callBack(teams);
+                                /*for (Team team : teams) {
                                     googleMap.addMarker(new MarkerOptions()
                                             .position(team.getAddress())
                                             .title(team.getName())
                                             .snippet(team.getWebAddress())
                                             .icon(BitmapDescriptorFactory.fromResource(team.getIconDrawable()))
                                             .infoWindowAnchor(0.5f, 0.5f));
-                                }
+                                }*/
                             }
                             if (countries != null && countries.size() > 0) {
                                 menu.clear();
@@ -118,6 +122,10 @@ public class SearchLocationManager {
             mInstance = new SearchLocationManager();
         }
         return mInstance;
+    }
+
+    public static void setViewCallback(ViewInterface.CallBackView<Team> callBackView) {
+        mCallBackView = callBackView;
     }
 
     public static void recalculateDistanceByZoomLevel(float newZoomLevel) {

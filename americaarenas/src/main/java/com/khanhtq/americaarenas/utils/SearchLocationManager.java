@@ -15,6 +15,7 @@ import com.khanhtq.appcore.item.Country;
 import com.khanhtq.appcore.item.League;
 import com.khanhtq.appcore.item.Team;
 import com.khanhtq.appcore.util.Constants;
+import com.khanhtq.appcore.view.ViewInterface;
 
 import java.util.List;
 import java.util.Queue;
@@ -55,6 +56,8 @@ public class SearchLocationManager {
 
     private static SearchLocationManager mInstance;
 
+    private static ViewInterface.CallBackView<Team> mCallBackView;
+
     public static float mDistanceByZoomLevel = 1;
 
     static {
@@ -82,14 +85,15 @@ public class SearchLocationManager {
                     switch (msg.what) {
                         case SEARCH_TEAM_COMPLETE:
                             if (teams != null && teams.size() > 0) {
-                                for (Team team : teams) {
+                                mCallBackView.callBack(teams);
+                                /*for (Team team : teams) {
                                     googleMap.addMarker(new MarkerOptions()
                                             .position(team.getAddress())
                                             .title(team.getName())
                                             .snippet(team.getWebAddress())
                                             .icon(BitmapDescriptorFactory.fromResource(team.getIconDrawable()))
                                             .infoWindowAnchor(0.5f, 0.5f));
-                                }
+                                }*/
                             }
                             recycleTask(searchTask);
                             break;
@@ -106,6 +110,10 @@ public class SearchLocationManager {
             mInstance = new SearchLocationManager();
         }
         return mInstance;
+    }
+
+    public static void setViewCallback(ViewInterface.CallBackView<Team> callBackView) {
+        mCallBackView = callBackView;
     }
 
     public static void recalculateDistanceByZoomLevel(float newZoomLevel) {

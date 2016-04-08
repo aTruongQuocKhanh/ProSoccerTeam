@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="title_size">23sp</dimen>
+    <dimen name="custom_profile_image">60dp</dimen>
+    <dimen name="custom_profile_padding">2dp</dimen>
+    <dimen name="team_footer_size">56dp</dimen>
 </resources>
