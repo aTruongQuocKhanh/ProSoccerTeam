@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">appcore</string>
+    <string name="team">Team</string>
     <string name="no_link_error">No Webpage found!</string>
 </resources>

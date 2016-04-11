@@ -2,11 +2,14 @@ package com.khanhtq.appcore.adapters;
 
 import android.app.Activity;
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.android.quadtree.PointQuadTree;
 import com.khanhtq.appcore.R;
 import com.khanhtq.appcore.item.Team;
 
@@ -19,12 +22,18 @@ import java.util.List;
 public class FooterListAdapter extends RecyclerView.Adapter<FooterListAdapter.FooterHolder> {
     private Activity mContext;
     private List<Team> mTeams;
+    private ItemClickCallback mItemClickCallBack;
 
-    public FooterListAdapter(Activity activity,List<Team> teams) {
+    public FooterListAdapter(Activity activity, List<Team> teams, ItemClickCallback itemClickCallBack) {
+        mContext = activity;
         mTeams = teams;
+        mItemClickCallBack = itemClickCallBack;
     }
 
     public void reload(List<Team> newTeams) {
+        if (mTeams.contains(newTeams.get(0))) {
+            return;
+        }
         mTeams = new ArrayList<>();
         mTeams.addAll(newTeams);
         notifyDataSetChanged();
@@ -32,7 +41,7 @@ public class FooterListAdapter extends RecyclerView.Adapter<FooterListAdapter.Fo
 
     @Override
     public FooterHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = mContext.getLayoutInflater().inflate(R.layout.footer_team_item_view, parent, false);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.footer_team_item_view, parent, false);
         FooterHolder holder = new FooterHolder(view);
         return holder;
     }
@@ -43,11 +52,12 @@ public class FooterListAdapter extends RecyclerView.Adapter<FooterListAdapter.Fo
         if (team != null) {
             holder.mTeamIcon.setImageResource(team.getIconDrawable());
             holder.mTeamName.setText(team.getName());
+            holder.position = position;
         }
     }
 
     private Team getItem(int position) {
-        return (mTeams == null || mTeams.size() - 1 < position) ? null : mTeams.get(position);
+        return (mTeams == null || mTeams.size() <= position) ? null : mTeams.get(position);
     }
 
     @Override
@@ -58,9 +68,25 @@ public class FooterListAdapter extends RecyclerView.Adapter<FooterListAdapter.Fo
     class FooterHolder extends RecyclerView.ViewHolder {
         ImageView mTeamIcon;
         TextView mTeamName;
+        int position;
 
-        FooterHolder(View itemView) {
+        FooterHolder(final View itemView) {
             super(itemView);
+            mTeamIcon = (ImageView) itemView.findViewById(R.id.team_icon);
+            mTeamName = (TextView) itemView.findViewById(R.id.team_name);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Team currentTeam = getItem(position);
+                    if (currentTeam != null) {
+                        mItemClickCallBack.callback(currentTeam.getPosition());
+                    }
+                }
+            });
         }
+    }
+
+    public interface ItemClickCallback {
+        void callback(LatLng position);
     }
 }

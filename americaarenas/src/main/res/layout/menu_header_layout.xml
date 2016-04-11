@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="120dp"
-    android:orientation="vertical">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="?attr/actionBarSize">
 
-    <TextView
+    <com.khanhtq.appcore.view.CustomTextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="America \n Arena"
-        android:textSize="50sp"
-        android:gravity="center"/>
-</LinearLayout>
+        android:gravity="center"
+        android:text="@string/app_name"
+        android:textAllCaps="false"
+        android:textColor="@color/colorText"
+        android:textSize="@dimen/menu_header_text_size"
+        android:textStyle="bold"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/colorText"
+        android:layout_alignParentBottom="true"/>
+</RelativeLayout>

@@ -6,6 +6,8 @@
         android:label="@string/app_name"
         android:supportsRtl="true">
         <activity android:name=".activities.WebViewActivity"/>
+        <activity android:name=".activities.TeamListActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
     </application>
 
 </manifest>

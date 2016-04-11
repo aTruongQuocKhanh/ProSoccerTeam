@@ -41,8 +41,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/footer_height"
                 android:paddingTop="@dimen/footer_padding"
+                android:paddingBottom="@dimen/footer_padding"
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
+                android:background="@color/colorFooterBackground"
                 android:orientation="horizontal">
 
                 <android.support.v7.widget.RecyclerView

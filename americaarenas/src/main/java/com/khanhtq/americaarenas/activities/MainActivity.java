@@ -20,9 +20,11 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -30,11 +32,12 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
 import com.google.maps.android.clustering.ClusterManager;
 import com.khanhtq.americaarenas.R;
 import com.khanhtq.americaarenas.adapters.AmericaTeamInfoWindowAdapter;
+import com.khanhtq.americaarenas.utils.Constant;
 import com.khanhtq.americaarenas.utils.SearchLocationManager;
+import com.khanhtq.appcore.activities.TeamListActivity;
 import com.khanhtq.appcore.activities.WebViewActivity;
 import com.khanhtq.appcore.item.League;
 import com.khanhtq.appcore.item.Team;
@@ -43,6 +46,7 @@ import com.khanhtq.appcore.util.FooterManager;
 import com.khanhtq.appcore.util.TeamRender;
 import com.khanhtq.appcore.view.ViewInterface;
 
+import io.fabric.sdk.android.Fabric;
 import java.util.List;
 
 /**
@@ -76,13 +80,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_main);
 
         mCurrentLeague = Constants.ALL_LEAGUE;
         mHandler = new Handler();
 
-        setupActionBar();
         hideSplash();
+        setupActionBar();
 
         SearchLocationManager.getInstance().setViewCallback(this);
 
@@ -101,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setSupportActionBar(mToolbar);
         final ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
+            actionBar.setHomeAsUpIndicator(R.drawable.header_hamburger);
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
     }
@@ -130,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             Intent action = new Intent();
             action.putExtra(ORDER_KEY, i);
             MenuItem item = menu.add(Constants.AMERICA_LEAGUE[i].getName() + Constants.WHITE_SPACE + "(" + Constants.AMERICA_LEAGUE[i].getType() + ")");
-            item.setIcon(getResources().getDrawable(R.drawable.menu_icon));
+            item.setIcon(getResources().getDrawable(Constant.MENU_ICONS[i]));
             item.setIntent(action);
         }
     }
@@ -161,10 +166,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
                 mDrawerlayout.openDrawer(GravityCompat.START);
+                return true;
+            case R.id.open_team:
+                Intent teamIntent = new Intent(this, TeamListActivity.class);
+                startActivity(teamIntent);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -181,6 +196,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setOnMarkerClickListener(mClusterManager);
         mMap.setOnInfoWindowClickListener(mClusterManager);
         mClusterManager.setOnClusterItemInfoWindowClickListener(this);
+        mFooterManager.setMapForCallback(mMap);
         enableMyLocation();
     }
 
@@ -234,12 +250,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onProviderEnabled(String provider) {
-
+        // TO-DO: do nothing here
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-
+        // TO-DO: do nothing here
     }
 
     @Override

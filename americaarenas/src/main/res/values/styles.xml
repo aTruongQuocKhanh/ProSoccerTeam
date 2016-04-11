@@ -11,7 +11,7 @@
 
     <style name="MenuTheme" parent="Theme.AppCompat.Light">
         <item name="android:textSize">@dimen/menu_item_text_size</item>
-        <item name="android:textColor">@color/toolbarTitle</item>
+        <item name="android:textColor">@color/colorText</item>
     </style>
 
 </resources>

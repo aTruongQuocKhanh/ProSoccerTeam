@@ -4,4 +4,7 @@
     <dimen name="custom_profile_image">60dp</dimen>
     <dimen name="custom_profile_padding">2dp</dimen>
     <dimen name="team_footer_size">56dp</dimen>
+    <dimen name="footer_item_icon_height">40dp</dimen>
+    <dimen name="footer_item_name_height">16dp</dimen>
+    <dimen name="footer_item_name_txt_size">12sp</dimen>
 </resources>
