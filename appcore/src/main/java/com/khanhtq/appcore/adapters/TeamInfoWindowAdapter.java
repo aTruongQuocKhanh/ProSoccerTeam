@@ -5,6 +5,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.khanhtq.appcore.R;
 import com.khanhtq.appcore.item.Team;
@@ -18,10 +19,15 @@ public abstract class TeamInfoWindowAdapter implements GoogleMap.InfoWindowAdapt
 
     private Activity mActivity;
     private final View mWindows;
+    protected LatLng mCurrentLocation;
 
     public TeamInfoWindowAdapter(Activity activity) {
         mActivity = activity;
         mWindows = activity.getLayoutInflater().inflate(R.layout.team_info_window, null);
+    }
+
+    public void setNewLocation(LatLng newLocation) {
+        mCurrentLocation = newLocation;
     }
 
     @Override

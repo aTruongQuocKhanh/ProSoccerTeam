@@ -11,6 +11,12 @@ import com.khanhtq.appcore.item.Team;
  * Created by khanhtq on 2/18/16.
  */
 public class Constants {
+    public static final String MILE_SIGN = " Miles";
+
+    public static final float KM_TO_MILE = 0.621371f;
+
+    public static final String EMPTY = "";
+
     public static final String WHITE_SPACE = " ";
 
     public static final float EQUATOR_LENGTH = 40075;

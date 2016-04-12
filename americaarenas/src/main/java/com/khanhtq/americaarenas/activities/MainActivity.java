@@ -32,6 +32,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
 import com.khanhtq.americaarenas.R;
 import com.khanhtq.americaarenas.adapters.AmericaTeamInfoWindowAdapter;
@@ -57,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         LocationListener,
         ClusterManager.OnClusterItemInfoWindowClickListener<Team>,
         ClusterManager.OnClusterItemClickListener<Team>,
+        ClusterManager.OnClusterClickListener<Team>,
         NavigationView.OnNavigationItemSelectedListener,
         ViewInterface.CallBackView<Team>  {
     public static final String TAG = MainActivity.class.getSimpleName();
@@ -76,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private League mCurrentLeague;
     private ClusterManager<Team> mClusterManager;
     private FooterManager mFooterManager;
+    private AmericaTeamInfoWindowAdapter mInfoWindowAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_main);
 
         mCurrentLeague = Constants.ALL_LEAGUE;
+        mInfoWindowAdapter = new AmericaTeamInfoWindowAdapter(this);
         mHandler = new Handler();
 
         hideSplash();
@@ -191,7 +195,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap = googleMap;
         mClusterManager = new ClusterManager<Team>(this, mMap);
         mClusterManager.setRenderer(new TeamRender(this, mMap, mClusterManager));
-        mMap.setInfoWindowAdapter(new AmericaTeamInfoWindowAdapter(this));
+        mMap.setInfoWindowAdapter(mInfoWindowAdapter);
         mMap.setOnCameraChangeListener(this);
         mMap.setOnMarkerClickListener(mClusterManager);
         mMap.setOnInfoWindowClickListener(mClusterManager);
@@ -238,6 +242,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         double latitude = location.getLatitude();
         double longitude = location.getLongitude();
         LatLng newPos = new LatLng(latitude, longitude);
+        mInfoWindowAdapter.setNewLocation(newPos);
         if (mMap != null) {
             mMap.moveCamera(CameraUpdateFactory.newLatLng(newPos));
             mMap.animateCamera(CameraUpdateFactory.zoomTo(Constants.DEFAULT_ZOOM_LEVEL));
@@ -304,5 +309,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         mClusterManager.cluster();
         mFooterManager.addTeam(teams);
+    }
+
+    @Override
+    public boolean onClusterClick(Cluster<Team> cluster) {
+        return false;
     }
 }
