@@ -34,6 +34,7 @@ public class TeamListActivity extends AppCompatActivity implements
         LocationListener {
     public static final String TAG = TeamListActivity.class.getSimpleName();
     public static final String TEAM_LIST_KEY = "TEAM_LIST_KEY";
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
     private TextView mTitleView;
     private RecyclerView mTeamListView;
@@ -66,14 +67,23 @@ public class TeamListActivity extends AppCompatActivity implements
 
     private void loadTeamList() {
         mTeamListView = (RecyclerView) findViewById(R.id.teams_recyclerview);
-        mTeamListView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        mTeamListView.setLayoutManager(mLayoutManager);
         mTeamListView.addItemDecoration(new RecyclerViewDivider(1));
         mListTeam = PreferenceUtil.getInstance(this).getListObject(TEAM_LIST_KEY);
         if (mListTeam != null) {
             mAdapter = new TeamListAdapter(this, mListTeam);
+            mTeamListView.setAdapter(mAdapter);
             LocationManager mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
             String provider = mLocationManager.getBestProvider(new Criteria(), true);
-
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            Location location = mLocationManager.getLastKnownLocation(provider);
+            if (location != null) {
+                onLocationChanged(location);
+            }
+            mLocationManager.requestLocationUpdates(provider, Constants.UPDATE_LOCATION_TIME, 0, this);
         }
     }
 

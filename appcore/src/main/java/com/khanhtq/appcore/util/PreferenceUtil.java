@@ -5,7 +5,9 @@ import android.content.SharedPreferences;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.khanhtq.appcore.item.Team;
 
+import java.lang.reflect.Type;
 import java.util.List;
 
 /**
@@ -45,10 +47,11 @@ public class PreferenceUtil {
         mEditor.commit();
     }
 
-    public <T> List<T> getListObject(String key) {
+    public List<Team> getListObject(String key) {
         String stringValue = mPreference.getString(key, Constants.EMPTY);
         if (stringValue != Constants.EMPTY) {
-            return gson.fromJson(stringValue, new TypeToken<List<T>>(){}.getType());
+            Type type = new TypeToken<List<Team>>(){}.getType();
+            return gson.fromJson(stringValue, type);
         }
         return null;
     }

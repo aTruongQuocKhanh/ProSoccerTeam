@@ -3,6 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/team_list_item_height"
+    android:background="@color/colorBackgroundTeamItem"
     android:padding="@dimen/horizontal_margin">
 
     <com.khanhtq.appcore.view.RoundedImageView
@@ -24,26 +25,30 @@
         <com.khanhtq.appcore.view.CustomTextView
             android:id="@+id/team_name_txt_view"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
             android:gravity="left"
             android:textColor="@color/colorText"
-            android:textSize="23sp"
+            android:textSize="18sp"
             android:textStyle="bold"/>
 
         <com.khanhtq.appcore.view.CustomTextView
             android:id="@+id/team_address_txt_view"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginTop="3dp"
             android:gravity="left"
-            android:textColor="#e3e3e3"
-            android:textSize="18sp"/>
+            android:textColor="#cccccc"
+            android:textSize="13sp"/>
     </LinearLayout>
 
     <com.khanhtq.appcore.view.CustomTextView
         android:id="@+id/distance_txt_view"
-        android:layout_width="@dimen/team_icon_size"
+        android:layout_width="@dimen/team_distance_width"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
+        android:singleLine="true"
         android:textColor="@color/colorText"
-        android:textSize="18sp"/>
+        android:textSize="15sp"/>
 </RelativeLayout>

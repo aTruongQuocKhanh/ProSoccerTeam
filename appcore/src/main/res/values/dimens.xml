@@ -15,5 +15,6 @@
 
     <dimen name="team_list_item_height">72dp</dimen>
     <dimen name="team_icon_size">40dp</dimen>
+    <dimen name="team_distance_width">120dp</dimen>
     <dimen name="horizontal_margin">16dp</dimen>
 </resources>

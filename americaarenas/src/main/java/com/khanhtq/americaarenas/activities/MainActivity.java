@@ -20,7 +20,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -44,6 +43,7 @@ import com.khanhtq.appcore.item.League;
 import com.khanhtq.appcore.item.Team;
 import com.khanhtq.appcore.util.Constants;
 import com.khanhtq.appcore.util.FooterManager;
+import com.khanhtq.appcore.util.PreferenceUtil;
 import com.khanhtq.appcore.util.TeamRender;
 import com.khanhtq.appcore.view.ViewInterface;
 
@@ -76,9 +76,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleMap mMap;
     private LocationManager mLocationManager;
     private League mCurrentLeague;
+    private boolean hasChangeLeague = false;
     private ClusterManager<Team> mClusterManager;
     private FooterManager mFooterManager;
     private AmericaTeamInfoWindowAdapter mInfoWindowAdapter;
+    private PreferenceUtil mPreferenceUtil;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mCurrentLeague = Constants.ALL_LEAGUE;
         mInfoWindowAdapter = new AmericaTeamInfoWindowAdapter(this);
+        mPreferenceUtil = PreferenceUtil.getInstance(this).initialize();
         mHandler = new Handler();
 
         hideSplash();
@@ -200,6 +203,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setOnMarkerClickListener(mClusterManager);
         mMap.setOnInfoWindowClickListener(mClusterManager);
         mClusterManager.setOnClusterItemInfoWindowClickListener(this);
+        mClusterManager.setOnClusterClickListener(this);
         mFooterManager.setMapForCallback(mMap);
         enableMyLocation();
     }
@@ -282,6 +286,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         int itemOrder = intent.getIntExtra(ORDER_KEY, 0);
         Log.d(TAG, "onNavigationItemSelected(MenuItem item) --- item order is " + itemOrder);
         mCurrentLeague = Constants.AMERICA_LEAGUE[itemOrder];
+        hasChangeLeague = true;
         if (mMap != null) {
             mMap.clear();
             mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(UNITED_STATES, 50));
@@ -308,11 +313,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             mClusterManager.addItem(t);
         }
         mClusterManager.cluster();
-        mFooterManager.addTeam(teams);
+        if (hasChangeLeague) {
+            mFooterManager.addTeam(teams);
+            mPreferenceUtil.setListObject(TeamListActivity.TEAM_LIST_KEY, teams);
+            hasChangeLeague = false;
+        }
     }
 
     @Override
     public boolean onClusterClick(Cluster<Team> cluster) {
-        return false;
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(cluster.getPosition(), mMap.getCameraPosition().zoom + 2));
+        return true;
     }
 }

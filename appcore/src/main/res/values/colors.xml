@@ -3,4 +3,5 @@
     <color name="toolbarTitle">#737373</color>
     <color name="colorFooterBackground">#ffffff</color>
     <color name="colorText">#2d364a</color>
+    <color name="colorBackgroundTeamItem">#f5f5f5</color>
 </resources>
