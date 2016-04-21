@@ -31,6 +31,9 @@ public class FooterManager implements FooterListAdapter.ItemClickCallback {
     private void setUpListView() {
         LinearLayoutManager layoutManager = new LinearLayoutManager(mActivity, LinearLayoutManager.HORIZONTAL, false);
         mFooterAdapter = new FooterListAdapter(mActivity, new ArrayList<Team>(), this);
+        RecyclerView.ItemDecoration itemDecoration = new
+                DividerItemDecoration(mActivity, DividerItemDecoration.HORIZONTAL_LIST);
+        mFooterListView.addItemDecoration(itemDecoration);
         mFooterListView.setLayoutManager(layoutManager);
         mFooterListView.setAdapter(mFooterAdapter);
     }

@@ -22,6 +22,7 @@ import com.khanhtq.appcore.R;
 import com.khanhtq.appcore.adapters.TeamListAdapter;
 import com.khanhtq.appcore.item.Team;
 import com.khanhtq.appcore.util.Constants;
+import com.khanhtq.appcore.util.DividerItemDecoration;
 import com.khanhtq.appcore.util.PreferenceUtil;
 import com.khanhtq.appcore.util.RecyclerViewDivider;
 
@@ -69,7 +70,9 @@ public class TeamListActivity extends AppCompatActivity implements
         mTeamListView = (RecyclerView) findViewById(R.id.teams_recyclerview);
         mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mTeamListView.setLayoutManager(mLayoutManager);
-        mTeamListView.addItemDecoration(new RecyclerViewDivider(1));
+        RecyclerView.ItemDecoration itemDecoration = new
+                DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST);
+        mTeamListView.addItemDecoration(itemDecoration);
         mListTeam = PreferenceUtil.getInstance(this).getListObject(TEAM_LIST_KEY);
         if (mListTeam != null) {
             mAdapter = new TeamListAdapter(this, mListTeam);

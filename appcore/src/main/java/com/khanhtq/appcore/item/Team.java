@@ -8,6 +8,7 @@ import com.google.maps.android.clustering.ClusterItem;
 import java.text.DecimalFormat;
 
 import io.realm.RealmObject;
+import io.realm.annotations.Required;
 
 /**
  * Created by khanhtq on 2/17/16.
@@ -17,8 +18,8 @@ public class Team implements ClusterItem {
     private League league;
     private LatLng address;
     private String description;
-    private String mWebAddress;
-    private String mWikiAddress;
+    private String link;
+    private String wiki;
     private int mIconDrawable;
 
     public Team(String name, League league, LatLng address, String description, String webAddress, String wikiAddress, int iconDrawable) {
@@ -26,8 +27,8 @@ public class Team implements ClusterItem {
         this.league = league;
         this.address = address;
         this.description = description;
-        mWebAddress = webAddress;
-        mWikiAddress = wikiAddress;
+        link = webAddress;
+        wiki = wikiAddress;
         mIconDrawable = iconDrawable;
     }
 
@@ -39,20 +40,16 @@ public class Team implements ClusterItem {
         return league;
     }
 
-    public LatLng getAddress() {
-        return address;
-    }
-
     public String getDescription() {
         return description;
     }
 
     public String getWebAddress() {
-        return mWebAddress;
+        return link;
     }
 
     public String getWikiAddress() {
-        return mWikiAddress;
+        return wiki;
     }
 
     public int getIconDrawable() {
@@ -60,7 +57,7 @@ public class Team implements ClusterItem {
     }
 
     public boolean isPosition(LatLng latLng) {
-        return (address != null && address.latitude == latLng.latitude && address.longitude == latLng.longitude);
+        return (address != null && calculateByDistance(latLng) <= 2);
     }
 
     public double calculateByDistance(LatLng latLng) {

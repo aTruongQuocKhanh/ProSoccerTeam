@@ -9,6 +9,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
@@ -22,6 +23,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -61,20 +63,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ClusterManager.OnClusterClickListener<Team>,
         NavigationView.OnNavigationItemSelectedListener,
         ViewInterface.CallBackView<Team>  {
-    public static final String TAG = MainActivity.class.getSimpleName();
+    private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private static final LatLngBounds UNITED_STATES = new LatLngBounds(new LatLng(18.9106768, 172.4458955), new LatLng(71.3867745, -66.9502861));
     private static final String ORDER_KEY = "ORDER";
 
     private View mSplashView;
     private Toolbar mToolbar;
+    private TextView mTitleTextView;
     private DrawerLayout mDrawerlayout;
     private NavigationView mNavigationView;
-    private ActionBarDrawerToggle mDrawerToggle;
 
     private Handler mHandler;
     private GoogleMap mMap;
-    private LocationManager mLocationManager;
     private League mCurrentLeague;
     private boolean hasChangeLeague = false;
     private ClusterManager<Team> mClusterManager;
@@ -109,12 +110,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      */
     private void setupActionBar() {
         mToolbar = (Toolbar) findViewById(R.id.toolbar_layout);
-        mToolbar.setTitle("");
-        setSupportActionBar(mToolbar);
-        final ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setHomeAsUpIndicator(R.drawable.header_hamburger);
-            actionBar.setDisplayHomeAsUpEnabled(true);
+        if (mToolbar != null) {
+            mTitleTextView = (TextView) mToolbar.findViewById(R.id.title_txt_view);
+            mToolbar.setTitle("");
+            setSupportActionBar(mToolbar);
+            final ActionBar actionBar = getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.setHomeAsUpIndicator(R.drawable.header_hamburger);
+                actionBar.setDisplayHomeAsUpEnabled(true);
+            }
         }
     }
 
@@ -153,8 +157,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void setupNavigationView() {
         mDrawerlayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mNavigationView = (NavigationView) findViewById(R.id.navigationView);
-        mNavigationView.setNavigationItemSelectedListener(this);
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerlayout, mToolbar, R.string.app_name, R.string.app_name);
+        if (mNavigationView != null) {
+            mNavigationView.setNavigationItemSelectedListener(this);
+        }
+        ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerlayout, mToolbar, R.string.app_name, R.string.app_name);
         mDrawerlayout.setDrawerListener(mDrawerToggle);
         mDrawerToggle.syncState();
     }
@@ -213,14 +219,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      */
     private void enableMyLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "Not grant permission");
+            Log.d(LOG_TAG, "Not grant permission");
             if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
             }
         } else if (mMap != null) {
-            Log.d(TAG, "Map != null");
+            Log.d(LOG_TAG, "Map != null");
             mMap.setMyLocationEnabled(true);
-            mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+            LocationManager mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
             String provider = mLocationManager.getBestProvider(new Criteria(), true);
             Location location = mLocationManager.getLastKnownLocation(provider);
             if (location != null) {
@@ -231,10 +237,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, int[] grantResults) {
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (permissions.length == 1 &&
-                    permissions[0] == Manifest.permission.ACCESS_FINE_LOCATION &&
+                    permissions[0].equals(Manifest.permission.ACCESS_FINE_LOCATION) &&
                     grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 enableMyLocation();
             }
@@ -269,7 +275,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
-        Log.d(TAG, "onCameraChange --- camera position is " + cameraPosition.target.latitude + "/" + cameraPosition.target.longitude);
+        Log.d(LOG_TAG, "onCameraChange --- camera position is " + cameraPosition.target.latitude + "/" + cameraPosition.target.longitude);
         if (mMap != null) {
             SearchLocationManager.recalculateDistanceByZoomLevel(cameraPosition.zoom);
             SearchLocationManager.startSearchTeam(mMap, cameraPosition.target, mCurrentLeague);
@@ -284,11 +290,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             return true;
         }
         int itemOrder = intent.getIntExtra(ORDER_KEY, 0);
-        Log.d(TAG, "onNavigationItemSelected(MenuItem item) --- item order is " + itemOrder);
+        Log.d(LOG_TAG, "onNavigationItemSelected(MenuItem item) --- item order is " + itemOrder);
         mCurrentLeague = Constants.AMERICA_LEAGUE[itemOrder];
+        mTitleTextView.setText(mCurrentLeague.getName());
         hasChangeLeague = true;
         if (mMap != null) {
             mMap.clear();
+            mClusterManager.clearItems();
             mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(UNITED_STATES, 50));
         }
         mDrawerlayout.closeDrawers();
@@ -314,6 +322,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         mClusterManager.cluster();
         if (hasChangeLeague) {
+            mInfoWindowAdapter.setTeams(teams);
             mFooterManager.addTeam(teams);
             mPreferenceUtil.setListObject(TeamListActivity.TEAM_LIST_KEY, teams);
             hasChangeLeague = false;

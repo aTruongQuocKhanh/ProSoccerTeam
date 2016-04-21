@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:ads="http://schemas.android.com/apk/res-auto"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<RelativeLayout xmlns:ads="http://schemas.android.com/apk/res-auto"
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
     <android.support.v4.widget.DrawerLayout
         android:id="@+id/drawer_layout"
@@ -20,13 +20,13 @@
                 android:id="@+id/header_layout"
                 layout="@layout/header_layout"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"/>
 
             <FrameLayout
                 android:id="@+id/content_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_above="@+id/footer_view"
+                android:layout_above="@+id/footer_team_recyclerview"
                 android:layout_below="@+id/header_layout">
 
                 <fragment
@@ -34,34 +34,26 @@
                     android:name="com.google.android.gms.maps.SupportMapFragment"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    tools:context=".activities.MainActivity" />
+                    tools:context=".activities.MainActivity"/>
             </FrameLayout>
-            <LinearLayout
-                android:id="@+id/footer_view"
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/footer_team_recyclerview"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/footer_height"
-                android:paddingTop="@dimen/footer_padding"
-                android:paddingBottom="@dimen/footer_padding"
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
-                android:background="@color/colorFooterBackground"
-                android:orientation="horizontal">
-
-                <android.support.v7.widget.RecyclerView
-                    android:id="@+id/footer_team_recyclerview"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight=".1"/>
-            </LinearLayout>
+                android:paddingBottom="@dimen/footer_padding"
+                android:paddingTop="@dimen/footer_padding"/>
         </RelativeLayout>
 
         <android.support.design.widget.NavigationView
             android:id="@+id/navigationView"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_gravity="left"
+            android:layout_gravity="start"
             app:headerLayout="@layout/menu_header_layout"
-            app:theme="@style/MenuTheme" />
+            app:theme="@style/MenuTheme"/>
 
     </android.support.v4.widget.DrawerLayout>
 
@@ -69,6 +61,6 @@
         android:id="@+id/splash_layout"
         layout="@layout/splash_screen"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"/>
 
 </RelativeLayout>

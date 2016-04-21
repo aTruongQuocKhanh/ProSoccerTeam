@@ -3,4 +3,8 @@
     <string name="team">Team</string>
     <string name="no_link_error">No Webpage found!</string>
     <string name="go_to_website">Go to Official Website</string>
+    <plurals name="distance">
+        <item quantity="one">%f Mile</item>
+        <item quantity="other">%f Miles</item>
+    </plurals>
 </resources>

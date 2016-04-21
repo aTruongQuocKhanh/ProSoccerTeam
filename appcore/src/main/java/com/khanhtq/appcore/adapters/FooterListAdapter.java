@@ -3,6 +3,7 @@ package com.khanhtq.appcore.adapters;
 import android.app.Activity;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -74,11 +75,15 @@ public class FooterListAdapter extends RecyclerView.Adapter<FooterListAdapter.Fo
             super(itemView);
             mTeamIcon = (ImageView) itemView.findViewById(R.id.team_icon);
             mTeamName = (TextView) itemView.findViewById(R.id.team_name);
+            itemView.setClickable(true);
+            itemView.setFocusable(false);
+            itemView.setFocusableInTouchMode(false);
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Team currentTeam = getItem(position);
                     if (currentTeam != null) {
+                        v.setSelected(true);
                         mItemClickCallBack.callback(currentTeam.getPosition());
                     }
                 }

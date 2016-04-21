@@ -1,13 +1,10 @@
 package com.khanhtq.americaarenas.utils;
 
-import android.view.Menu;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
-import com.khanhtq.appcore.item.Country;
 import com.khanhtq.appcore.item.League;
 import com.khanhtq.appcore.item.Team;
-import com.khanhtq.appcore.util.SearchCountryRunnable;
 import com.khanhtq.appcore.util.SearchTeamRunnable;
 
 import java.lang.ref.WeakReference;
@@ -16,7 +13,7 @@ import java.util.List;
 /**
  * Created by khanhtq on 2/18/16.
  */
-public class SearchTask implements SearchTeamRunnable.TaskSearchTeamMethods {
+class SearchTask implements SearchTeamRunnable.TaskSearchTeamMethods {
     private static SearchLocationManager mSearchLocationManager;
 
     private WeakReference<GoogleMap> mMap;
@@ -25,7 +22,7 @@ public class SearchTask implements SearchTeamRunnable.TaskSearchTeamMethods {
 
     private League mCurrentLeague;
 
-    private ArenaSearchTeamRunnable mSearchTeamRunnable;
+    private final ArenaSearchTeamRunnable mSearchTeamRunnable;
 
     private LatLng mCurrentPosition;
 

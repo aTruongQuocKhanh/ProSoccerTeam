@@ -3,15 +3,9 @@ package com.khanhtq.americaarenas.utils;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.view.Menu;
-import android.view.MenuItem;
 
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.khanhtq.americaarenas.R;
-import com.khanhtq.appcore.item.Country;
 import com.khanhtq.appcore.item.League;
 import com.khanhtq.appcore.item.Team;
 import com.khanhtq.appcore.util.Constants;
@@ -42,17 +36,17 @@ public class SearchLocationManager {
 
     private static final int NUMBER_OF_CORE = Runtime.getRuntime().availableProcessors();
 
-    private Handler mHandler;
+    private final Handler mHandler;
 
-    private BlockingQueue<Runnable> mSearchTeamQueue;
+    private final BlockingQueue<Runnable> mSearchTeamQueue;
 
-    private BlockingQueue<Runnable> mSearchCountryQueue;
+    private final BlockingQueue<Runnable> mSearchCountryQueue;
 
     private final Queue<SearchTask> mSearchTaskWorkQueue;
 
-    private ThreadPoolExecutor mSearchTeamThreadPool;
+    private final ThreadPoolExecutor mSearchTeamThreadPool;
 
-    private ThreadPoolExecutor mSearchCountryThreadPool;
+    private final ThreadPoolExecutor mSearchCountryThreadPool;
 
     private static SearchLocationManager mInstance;
 
@@ -64,7 +58,7 @@ public class SearchLocationManager {
         KEEP_ALIVE_TIME_UNIT = TimeUnit.SECONDS;
     }
 
-    SearchLocationManager() {
+    private SearchLocationManager() {
         mSearchTeamQueue = new LinkedBlockingQueue<Runnable>();
 
         mSearchCountryQueue = new LinkedBlockingQueue<Runnable>();
@@ -86,14 +80,6 @@ public class SearchLocationManager {
                         case SEARCH_TEAM_COMPLETE:
                             if (teams != null && teams.size() > 0) {
                                 mCallBackView.callBack(teams);
-                                /*for (Team team : teams) {
-                                    googleMap.addMarker(new MarkerOptions()
-                                            .position(team.getAddress())
-                                            .title(team.getName())
-                                            .snippet(team.getWebAddress())
-                                            .icon(BitmapDescriptorFactory.fromResource(team.getIconDrawable()))
-                                            .infoWindowAnchor(0.5f, 0.5f));
-                                }*/
                             }
                             recycleTask(searchTask);
                             break;
@@ -155,7 +141,7 @@ public class SearchLocationManager {
      *
      * @param searchTask The task to recycle
      */
-    void recycleTask(SearchTask searchTask) {
+    private void recycleTask(SearchTask searchTask) {
 
         // Frees up memory in the task
         searchTask.recycle();

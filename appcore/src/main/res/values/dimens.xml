@@ -17,4 +17,7 @@
     <dimen name="team_icon_size">40dp</dimen>
     <dimen name="team_distance_width">120dp</dimen>
     <dimen name="horizontal_margin">16dp</dimen>
+
+    <dimen name="team_act_name_txt_size">16sp</dimen>
+    <dimen name="team_act_dist_txt_size">11sp</dimen>
 </resources>

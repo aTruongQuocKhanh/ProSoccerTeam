@@ -14,8 +14,8 @@ import java.util.List;
 /**
  * Created by khanhtq on 2/18/16.
  */
-public class ArenaSearchTeamRunnable extends SearchTeamRunnable{
-    public static final String TAG = ArenaSearchTeamRunnable.class.getSimpleName();
+class ArenaSearchTeamRunnable extends SearchTeamRunnable{
+    private static final String TAG = ArenaSearchTeamRunnable.class.getSimpleName();
 
     public ArenaSearchTeamRunnable(TaskSearchTeamMethods searchTeamTask) {
         super(searchTeamTask);
@@ -28,7 +28,7 @@ public class ArenaSearchTeamRunnable extends SearchTeamRunnable{
         mSearchTeamTask.handleSearchTeamState(SearchLocationManager.SEARCH_TEAM_STARTED);
         final LatLng currentPosition = mSearchTeamTask.getCurrentPosition();
         final League currentLeague = mSearchTeamTask.getCurrentLeague();
-        List<Team> results = new ArrayList<Team>();
+        List<Team> results = new ArrayList<>();
         if (currentPosition != null && currentLeague != null) {
             for (Team team : Constants.AMERICA_TEAM_LIST) {
                 double distance = team.calculateByDistance(currentPosition);

@@ -7,7 +7,7 @@ import com.khanhtq.americaarenas.R;
  */
 public class Constant {
 
-    public static int[] MENU_ICONS = {
+    public final static int[] MENU_ICONS = {
             R.drawable.soccer,
             R.drawable.basketball,
             R.drawable.baseball,
